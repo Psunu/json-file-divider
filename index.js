@@ -14,12 +14,17 @@ program
     "--count <count>",
     "number of json documents to be stored in the same file",
     1000
+  )
+  .option(
+    "--nd-json",
+    "if enabled, output will be newline-delimited json format"
   );
 program.parse();
 
 const inputPath = program.args[0];
 const outputFileName = program.opts().outName;
 const count = Number(program.opts().count);
+const isNdJson = program.opts().ndJson;
 
 const size = fs.statSync(inputPath).size;
 
@@ -57,7 +62,10 @@ function flushJson() {
 
 function flushJsons() {
   const output = outputFileName + fileIndex++ + ".json";
-  fs.writeFileSync(output, JSON.stringify(jsons));
+  const content = isNdJson
+    ? jsons.map(JSON.stringify).join("\n")
+    : JSON.stringify(jsons);
+  fs.writeFileSync(output, content);
   console.log(`${output} written`);
   jsons = [];
 }
